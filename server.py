@@ -4,6 +4,7 @@
 Clase (y programa principal) para un servidor de eco en UDP simple
 """
 
+import os
 import sys
 import socketserver
 
@@ -15,7 +16,8 @@ try:
     LISTEN_PORT = int(sys.argv[2])
     FILE = sys.argv[3]
 except IndexError:
-    sys.exit('usage: ' + USAGE)
+    sys.exit('Usage: ' + USAGE)
+
 
 class EchoHandler(socketserver.DatagramRequestHandler):
     """
@@ -31,18 +33,22 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                 break
 
             METHOD = line.decode('utf-8').split(' ')[0]
-            if METHOD == 'INVITE':
-                self.wfile.write(b'SIP/2.0 100 Trying\r\n')
-                self.wfile.write(b'SIP/2.0 180 Ringing\r\n')
-                self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                print(METHOD + ' recieved')
-            elif METHOD == 'BYE':
-                self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                print(METHOD + ' recieved')
-            elif METHOD == 'ACK':
-                print(METHOD + ' recieved')
+            METHODS = 'INVITE', 'ACK', 'BYE'
+            if METHOD in METHODS:
+                if METHOD == 'INVITE':
+                    self.wfile.write(b'SIP/2.0 100 Trying\r\n')
+                    self.wfile.write(b'SIP/2.0 180 Ringing\r\n')
+                    self.wfile.write(b'SIP/2.0 200 OK\r\n')
+                    print(METHOD + ' recieved')
+                elif METHOD == 'BYE':
+                    self.wfile.write(b'SIP/2.0 200 OK\r\n')
+                    print(METHOD + ' recieved')
+                elif METHOD == 'ACK':
+                    print(METHOD + ' recieved')
+                else:
+                    self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
             else:
-                self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
+                self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
 
 
 if __name__ == "__main__":
