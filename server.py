@@ -39,6 +39,10 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             elif METHOD == 'BYE':
                 self.wfile.write(b'SIP/2.0 200 OK\r\n')
                 print(METHOD + ' recieved')
+            elif METHOD == 'ACK':
+                print(METHOD + ' recieved')
+            else:
+                self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
 
 
 if __name__ == "__main__":
