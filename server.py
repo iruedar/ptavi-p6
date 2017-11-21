@@ -18,6 +18,8 @@ try:
 except IndexError:
     sys.exit('Usage: ' + USAGE)
 
+if not os.path.exists(FILE):
+    sys.exit('File doesn\'t found')
 
 class EchoHandler(socketserver.DatagramRequestHandler):
     """
@@ -34,17 +36,18 @@ class EchoHandler(socketserver.DatagramRequestHandler):
 
             METHOD = line.decode('utf-8').split(' ')[0]
             METHODS = 'INVITE', 'ACK', 'BYE'
+            RTP = './mp32rtp -i 127.0.0.1 -p 23032 < ' + FILE
             if METHOD in METHODS:
+                print(METHOD + ' recieved')
                 if METHOD == 'INVITE':
                     self.wfile.write(b'SIP/2.0 100 Trying\r\n')
                     self.wfile.write(b'SIP/2.0 180 Ringing\r\n')
                     self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                    print(METHOD + ' recieved')
                 elif METHOD == 'BYE':
                     self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                    print(METHOD + ' recieved')
                 elif METHOD == 'ACK':
-                    print(METHOD + ' recieved')
+                    print('Ejecutamos ' + FILE)
+                    os.system(RTP)
                 else:
                     self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
             else:
