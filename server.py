@@ -8,7 +8,6 @@ import os
 import sys
 import socketserver
 
-
 USAGE = 'python3 server.py IP port audio_file'
 
 try:
@@ -20,6 +19,7 @@ except IndexError:
 
 if not os.path.exists(FILE):
     sys.exit('File doesn\'t found')
+
 
 class EchoHandler(socketserver.DatagramRequestHandler):
     """
@@ -38,7 +38,7 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             RTP = './mp32rtp -i 127.0.0.1 -p 23032 < ' + FILE
             brline = line.decode('utf-8').split(' ')
             if ('sip:' not in brline[1] or '@' not in brline[1] or
-                brline[2] != 'SIP/2.0\r\n\r\n'):
+               brline[2] != 'SIP/2.0\r\n\r\n'):
                 self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
             else:
                 if METHOD in METHODS:
@@ -52,8 +52,8 @@ class EchoHandler(socketserver.DatagramRequestHandler):
                     elif METHOD == 'ACK':
                         print('Ejecutamos ' + FILE)
                         os.system(RTP)
-                    else:
-                        self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
+                else:
+                    self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
 
 if __name__ == "__main__":
     # Creamos servidor de eco y escuchamos
