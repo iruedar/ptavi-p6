@@ -7,7 +7,6 @@ Programa cliente que abre un socket a un servidor
 import sys
 import socket
 
-
 USAGE = 'python3 client.py method receiver@IP:SIPport'
 
 try:
@@ -30,9 +29,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as my_socket:
     data = my_socket.recv(1024)
 
     ACK_LINE = 'ACK' + ' sip:' + NICK + '@' + IP + ' SIP/2.0\r\n'
-    if METHOD == 'INVITE':
+    if data.decode('utf-8').split(' ')[1] == '100':
         my_socket.send(bytes(ACK_LINE, 'utf-8') + b'\r\n')
-    
     print(data.decode('utf-8'))
     print("Terminando socket...")
 
