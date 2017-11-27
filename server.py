@@ -27,7 +27,6 @@ class EchoHandler(socketserver.DatagramRequestHandler):
     """
 
     def handle(self):
-        # Escribe dirección y puerto del cliente (de tupla client_address)
         while 1:
             # Leyendo línea a línea lo que nos envía el cliente
             line = self.rfile.read()
@@ -37,22 +36,24 @@ class EchoHandler(socketserver.DatagramRequestHandler):
             METHOD = line.decode('utf-8').split(' ')[0]
             METHODS = 'INVITE', 'ACK', 'BYE'
             RTP = './mp32rtp -i 127.0.0.1 -p 23032 < ' + FILE
-            if METHOD in METHODS:
-                print(METHOD + ' recieved')
-                if METHOD == 'INVITE':
-                    self.wfile.write(b'SIP/2.0 100 Trying\r\n')
-                    self.wfile.write(b'SIP/2.0 180 Ringing\r\n')
-                    self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                elif METHOD == 'BYE':
-                    self.wfile.write(b'SIP/2.0 200 OK\r\n')
-                elif METHOD == 'ACK':
-                    print('Ejecutamos ' + FILE)
-                    os.system(RTP)
-                else:
-                    self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
+            brline = line.decode('utf-8').split(' ')
+            if ('sip:' not in brline[1] or '@' not in brline[1] or
+                brline[2] != 'SIP/2.0\r\n\r\n'):
+                self.wfile.write(b'SIP/2.0 Bad Request\r\n\r\n')
             else:
-                self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
-
+                if METHOD in METHODS:
+                    print(METHOD + ' recieved')
+                    if METHOD == 'INVITE':
+                        self.wfile.write(b'SIP/2.0 100 Trying\r\n\r\n')
+                        self.wfile.write(b'SIP/2.0 180 Ringing\r\n\r\n')
+                        self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
+                    elif METHOD == 'BYE':
+                        self.wfile.write(b'SIP/2.0 200 OK\r\n\r\n')
+                    elif METHOD == 'ACK':
+                        print('Ejecutamos ' + FILE)
+                        os.system(RTP)
+                    else:
+                        self.wfile.write(b'SIP/2.0 405 Method Not Allowed\r\n\r\n')
 
 if __name__ == "__main__":
     # Creamos servidor de eco y escuchamos
